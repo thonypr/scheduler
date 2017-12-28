@@ -37,8 +37,10 @@ def get_stops_list():
 
     routes_list = []
     csv_raw_routes = requests.get('http://www.minsktrans.by/city/minsk/routes.txt').content.decode("utf-8-sig").encode("utf-8").split("\r\n")
+    print csv_raw_routes[-1]
     del csv_raw_routes[-1]
     headlines = csv_raw_routes[0].split(';')
+    del csv_raw_routes[0]
 
     for route in csv_raw_routes:
         route_item = route.split(';')
@@ -63,7 +65,31 @@ def get_stops_list():
 
         routes_list.append(route_dict)
 
+    filtered_routes = []
+    print routes_list[0]['RouteNum']
+
+    i = 0
+    print routes_list.__len__()
+
+    while i < routes_list.__len__():
+        print "entered"
+        print u'i = {}'.format(i)
+        # если указан RouteNum ок, берём элемент
+        if routes_list[i]['RouteNum']:
+            # print "found init"
+            filtered_routes.append(routes_list[i])
+            i += 1
+            # проверить, есть ли реверс
+            if not routes_list[i]['RouteNum'] and routes_list[i]['RouteName'].split(" - ").sort() == routes_list[i-1]['RouteName'].split(" - ").sort():
+                # print "found reverse"
+                routes_list[i]['RouteNum'] = routes_list[i-1]['RouteNum']
+                filtered_routes.append(routes_list[i])
+                i += 1
+        else:
+            i += 1
+        # if i > routes_list.__len__():
+        #     break
+    print u'i = {}'.format(i)
     return routes_list
 
 get_stops_list()
-test

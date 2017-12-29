@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 import requests
+import bs4
+
+bus_page_name = u"autobus"
+trolley_page_name = u"trolleybus"
+tram_page_name = u"tram"
 
 
 def get_routes_list():
@@ -92,4 +97,131 @@ def get_stops_list():
     print u'i = {}'.format(i)
     return routes_list
 
-get_stops_list()
+
+def get_routes_html(transport):
+    page = requests.get(u"https://kogda.by/routes/minsk/{}".format(transport)).content
+    try:
+        from BeautifulSoup import BeautifulSoup
+    except ImportError:
+        from bs4 import BeautifulSoup
+    html = page
+    parsed_html = BeautifulSoup(html)
+    routes = []
+    text = 0
+    i = 0
+    while text is not None:
+        text = parsed_html.body.find('div', attrs={'id': 'routes-block-{}'.format(i)})
+        if text is not None:
+            raw_routes = text.text.split("\n\n")
+            for raw_route in raw_routes:
+                try:
+                    value = raw_route.split("\n", 1)[1]
+                except BaseException:
+                    value = None
+                if value is not u'':
+                    routes.append(value)
+            i += 1
+        else:
+            print "All routes were found"
+    return routes
+
+
+def get_stops_in_route(direction, text, route_name):
+    result = []
+    try:
+        stops = text.body.find('div', attrs={'id': 'direction-{}'.format(direction)}).text
+        stops = stops.split("\n\n\n                                            ")
+        for stop in stops:
+            stop = stop.split('\n')[0]
+            result.append(stop)
+        del result[0]
+        return result
+    except BaseException:
+        return u"Error in getting stops for route {}".format(route_name)
+
+
+def get_stops_by_transport_and_number(transport, route_number):
+    page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
+    try:
+        from BeautifulSoup import BeautifulSoup
+    except ImportError:
+        from bs4 import BeautifulSoup
+    html = page
+    parsed_html = BeautifulSoup(html)
+    original_name = parsed_html.body.find('div', attrs={'id': 'direction-0-heading'}).text.split("\n\n\n                                ")[1].split("\n")[0]
+    reversed_name = parsed_html.body.find('div', attrs={'id': 'direction-1-heading'}).text.split("\n\n\n                                ")[1].split("\n")[0]
+    original_stops = get_stops_in_route(0, parsed_html, original_name)
+    reversed_stops = get_stops_in_route(1, parsed_html, reversed_name)
+    routes = []
+    # text = 0
+    # i = 0
+    # while text is not None:
+    #     text = parsed_html.body.find('div', attrs={'id': 'routes-block-{}'.format(i)})
+    #     if text is not None:
+    #         raw_routes = text.text.split("\n\n")
+    #         for raw_route in raw_routes:
+    #             try:
+    #                 value = raw_route.split("\n", 1)[1]
+    #             except BaseException:
+    #                 value = None
+    #             if value is not u'':
+    #                 routes.append(value)
+    #         i += 1
+    #     else:
+    #         print "All routes were found"
+    if reversed_name is not u'':
+        #TODO: think about getting route without reverse
+        return original_name, original_stops, reversed_name, reversed_stops
+    else:
+        return original_name, original_stops
+
+
+def get_around_times_at_stop(transport, route_number, route, stop):
+    result = []
+    page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}/{2}/{3}".format(transport, route_number, route, stop)).content
+    try:
+        from BeautifulSoup import BeautifulSoup
+    except ImportError:
+        from bs4 import BeautifulSoup
+    html = page
+    parsed_html = BeautifulSoup(html)
+    try:
+        times = parsed_html.body.find('div', attrs={'class': 'timetable'}).text.split("\n\n                    ")
+        for time in times:
+            result.append(time.split('\n')[0])
+        del result[0]
+        return result
+    except BaseException:
+        return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
+
+# get_stops_by_transport_and_number(u'trolleybus', u'35')
+# get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')
+#
+# x = requests.get(u"https://kogda.by/routes/minsk/autobus/30-с/Корженевского - Красный Бор/пл. Казинца").content
+
+transport = raw_input(u"Enter transport...\n")
+print transport
+routes = get_routes_html(transport)
+print u"List of routes for {}:".format(transport)
+for x in routes:
+    print x
+selected_route_number = raw_input(u"Enter route number...\n")
+print u"List of stops for {0} number {1}:".format(transport, selected_route_number)
+route_name, original_stops, reversed_name, reversed_stops = get_stops_by_transport_and_number(transport, selected_route_number)
+print u"Available stops for {}:".format(route_name)
+for y in original_stops:
+    print y
+
+print u"Available stops for {}:".format(reversed_name)
+for y in reversed_stops:
+    print y
+# route_name = raw_input(u"Enter route name...\n")
+# stop = raw_input(u"Enter stop name...\n")
+times = get_around_times_at_stop(transport, selected_route_number, route_name, original_stops[0])
+print u"Passed was at: {0}\n Next will be at: {1}\n Future will be at: {2}".format(times[0], times[1], times[2])
+i = 0
+# trolley_routes = get_routes_html(trolley_page_name)
+# tran_routes = get_routes_html(tram_page_name)
+i = 9
+
+

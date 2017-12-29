@@ -6,8 +6,8 @@ from telebot import types
 # import requests
 import json
 
-# token = os.environ['TELEGRAM_TOKEN']
-token = u"424882927:AAGKLtBw6ZmZyQQH9mfSKVpztQO6LxzyNX8"
+token = os.environ['TELEGRAM_TOKEN']
+# token = u"424882927:AAGKLtBw6ZmZyQQH9mfSKVpztQO6LxzyNX8"
 # If you use redis, install this add-on https://elements.heroku.com/addons/heroku-redis
 # r = redis.from_url(os.environ.get("REDIS_URL"))
 

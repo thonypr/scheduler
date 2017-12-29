@@ -199,29 +199,29 @@ def get_around_times_at_stop(transport, route_number, route, stop):
 #
 # x = requests.get(u"https://kogda.by/routes/minsk/autobus/30-с/Корженевского - Красный Бор/пл. Казинца").content
 
-transport = raw_input(u"Enter transport...\n")
-print transport
-routes = get_routes_html(transport)
-print u"List of routes for {}:".format(transport)
-for x in routes:
-    print x
-selected_route_number = raw_input(u"Enter route number...\n")
-print u"List of stops for {0} number {1}:".format(transport, selected_route_number)
-route_name, original_stops, reversed_name, reversed_stops = get_stops_by_transport_and_number(transport, selected_route_number)
-print u"Available stops for {}:".format(route_name)
-for y in original_stops:
-    print y
-
-print u"Available stops for {}:".format(reversed_name)
-for y in reversed_stops:
-    print y
-# route_name = raw_input(u"Enter route name...\n")
-# stop = raw_input(u"Enter stop name...\n")
-times = get_around_times_at_stop(transport, selected_route_number, route_name, original_stops[0])
-print u"Passed was at: {0}\n Next will be at: {1}\n Future will be at: {2}".format(times[0], times[1], times[2])
-i = 0
-# trolley_routes = get_routes_html(trolley_page_name)
-# tran_routes = get_routes_html(tram_page_name)
-i = 9
+# transport = raw_input(u"Enter transport...\n")
+# print transport
+# routes = get_routes_html(transport)
+# print u"List of routes for {}:".format(transport)
+# for x in routes:
+#     print x
+# selected_route_number = raw_input(u"Enter route number...\n")
+# print u"List of stops for {0} number {1}:".format(transport, selected_route_number)
+# route_name, original_stops, reversed_name, reversed_stops = get_stops_by_transport_and_number(transport, selected_route_number)
+# print u"Available stops for {}:".format(route_name)
+# for y in original_stops:
+#     print y
+#
+# print u"Available stops for {}:".format(reversed_name)
+# for y in reversed_stops:
+#     print y
+# # route_name = raw_input(u"Enter route name...\n")
+# # stop = raw_input(u"Enter stop name...\n")
+# times = get_around_times_at_stop(transport, selected_route_number, route_name, original_stops[0])
+# print u"Passed was at: {0}\n Next will be at: {1}\n Future will be at: {2}".format(times[0], times[1], times[2])
+# i = 0
+# # trolley_routes = get_routes_html(trolley_page_name)
+# # tran_routes = get_routes_html(tram_page_name)
+# i = 9
 
 

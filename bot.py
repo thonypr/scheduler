@@ -30,44 +30,53 @@ def handle_start(message):
     global stop
     global time
     to = message.from_user.id
-    if not init:
-        transport_keys = types.ReplyKeyboardMarkup(row_width=3)
-        itembtn1 = types.KeyboardButton('autobus')
-        itembtn2 = types.KeyboardButton('trolleybus')
-        itembtn3 = types.KeyboardButton('tram')
-        transport_keys.add(itembtn1, itembtn2, itembtn3)
-        bot.send_message(to, "Select transport:", reply_markup=transport_keys)
-        init = 1
-    elif not transport:
-        transport = message.text
-        numbers = minsk_trans.get_routes_html(transport)
-        numbers_count = numbers.__len__()
-        route_numbers_keys = types.ReplyKeyboardMarkup(row_width = numbers_count)
-        for route in numbers:
-            button = types.KeyboardButton(u'{}'.format(route))
-            route_numbers_keys.add(button)
-        bot.send_message(to, "Select route number:", reply_markup=route_numbers_keys)
-    elif not stop:
-        route_number = message.text
-        route_name, original_stops, reversed_name, reversed_stops = minsk_trans.get_stops_by_transport_and_number(transport, route_number)
-        keys_count = original_stops.__len__() + reversed_stops.__len__() + 2
-        stops_keys = types.ReplyKeyboardMarkup(row_width=keys_count)
-        stops_keys.add(u'{}'.format(route_name))
-        for stop in original_stops:
-            button = types.KeyboardButton(u'{}'.format(stop))
-            stops_keys.add(button)
-        stops_keys.add(u'{}'.format(reversed_name))
-        for stop in reversed_stops:
-            button = types.KeyboardButton(u'{}'.format(stop))
-            stops_keys.add(button)
-        bot.send_message(to, u"Select direction and stop:", reply_markup=stops_keys)
-    elif not time:
-        stop = message.text
-        route_name, original_stops, reversed_name, reversed_stops = minsk_trans.get_stops_by_transport_and_number(
-            transport, route_number)
-        #TODO: works only with > directions. Divide it to selecting route(direction)
-        times = minsk_trans.get_around_times_at_stop(transport, route_number, route_name, stop)
-        bot.send_message(to, u"Passed was at: {0}\nNext will be at: {1}\nFuture will be at: {2}".format(times[0], times[1], times[2]))
+    try:
+        if not init:
+            transport_keys = types.ReplyKeyboardMarkup(row_width=3)
+            itembtn1 = types.KeyboardButton('autobus')
+            itembtn2 = types.KeyboardButton('trolleybus')
+            itembtn3 = types.KeyboardButton('tram')
+            transport_keys.add(itembtn1, itembtn2, itembtn3)
+            bot.send_message(to, "Select transport:", reply_markup=transport_keys)
+            init = 1
+        elif not transport:
+            transport = message.text
+            numbers = minsk_trans.get_routes_html(transport)
+            numbers_count = numbers.__len__()
+            route_numbers_keys = types.ReplyKeyboardMarkup(row_width = numbers_count)
+            for route in numbers:
+                button = types.KeyboardButton(u'{}'.format(route))
+                route_numbers_keys.add(button)
+            bot.send_message(to, "Select route number:", reply_markup=route_numbers_keys)
+        elif not stop:
+            route_number = message.text
+            route_name, original_stops, reversed_name, reversed_stops = minsk_trans.get_stops_by_transport_and_number(transport, route_number)
+            keys_count = original_stops.__len__() + reversed_stops.__len__() + 2
+            stops_keys = types.ReplyKeyboardMarkup(row_width=keys_count)
+            stops_keys.add(u'{}'.format(route_name))
+            for stop in original_stops:
+                button = types.KeyboardButton(u'{}'.format(stop))
+                stops_keys.add(button)
+            stops_keys.add(u'{}'.format(reversed_name))
+            for stop in reversed_stops:
+                button = types.KeyboardButton(u'{}'.format(stop))
+                stops_keys.add(button)
+            bot.send_message(to, u"Select direction and stop:", reply_markup=stops_keys)
+        elif not time:
+            stop = message.text
+            route_name, original_stops, reversed_name, reversed_stops = minsk_trans.get_stops_by_transport_and_number(
+                transport, route_number)
+            #TODO: works only with > directions. Divide it to selecting route(direction)
+            times = minsk_trans.get_around_times_at_stop(transport, route_number, route_name, stop)
+            bot.send_message(to, u"Passed was at: {0}\nNext will be at: {1}\nFuture will be at: {2}".format(times[0], times[1], times[2]))
+            init = None
+            transport = None
+            # route_name = None
+            route_number = None
+            stop = None
+            time = None
+    except BaseException:
+        bot.send_message(to, u"Something went wrong...Reloading...")
         init = None
         transport = None
         # route_name = None

@@ -30,6 +30,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 GENDER, PHOTO, LOCATION, BIO = range(4)
+TRANSPORT, ROUTE, DIRECTION, STOP = range(4)
 
 
 def start(bot, update):
@@ -41,7 +42,17 @@ def start(bot, update):
         'Are you a boy or a girl?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-    return GENDER
+    return
+
+def start(bot, update):
+    reply_keyboard = [['autobus', 'trolleybus', 'tram']]
+
+    update.message.reply_text(
+        'Выберите вид транспорта'
+        'Для отмены наерите /cancel',
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
+    return TRANSPORT
 
 
 def gender(bot, update):

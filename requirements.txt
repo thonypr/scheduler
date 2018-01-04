@@ -2,9 +2,10 @@
 
 # If you need to specify a version
 requests
-pyTelegramBotAPI
+# pyTelegramBotAPI
 bs4
-telegram
+# telegram
+python-telegram-bot
 
 # Or you need not a pip package, @'...' specifies git branch
 # git+https://github.com/Kylmakalle/pyTelegramBotAPI.git@feature-BotAPIV3

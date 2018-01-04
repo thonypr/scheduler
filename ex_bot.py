@@ -17,10 +17,11 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
+import math
+from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                           ConversationHandler)
-
+import minsk_trans
 import logging
 
 # Enable logging
@@ -33,36 +34,74 @@ GENDER, PHOTO, LOCATION, BIO = range(4)
 TRANSPORT, ROUTE, DIRECTION, STOP = range(4)
 
 
-def start(bot, update):
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-
-    update.message.reply_text(
-        'Hi! My name is Professor Bot. I will hold a conversation with you. '
-        'Send /cancel to stop talking to me.\n\n'
-        'Are you a boy or a girl?',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-
-    return
+# def start(bot, update):
+#     reply_keyboard = [['Boy', 'Girl', 'Other']]
+#
+#     update.message.reply_text(
+#         'Hi! My name is Professor Bot. I will hold a conversation with you. '
+#         'Send /cancel to stop talking to me.\n\n'
+#         'Are you a boy or a girl?',
+#         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+#
+#     return
 
 def start(bot, update):
     reply_keyboard = [['autobus', 'trolleybus', 'tram']]
 
     update.message.reply_text(
-        'Выберите вид транспорта'
-        'Для отмены наерите /cancel',
+        'Выберите вид транспорта',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-    return TRANSPORT
+    return GENDER
 
+# def gender(bot, update):
+#     user = update.message.from_user
+#     logger.info("Gender of %s: %s", user.first_name, update.message.text)
+#     update.message.reply_text('I see! Please send me a photo of yourself, '
+#                               'so I know what you look like, or send /skip if you don\'t want to.',
+#                               reply_markup=ReplyKeyboardRemove())
+#
+#     return PHOTO
+
+def get_dimension(count):
+    side = math.sqrt(count)
+    whole = math.trunc(side)
+    return whole + 1
+
+def create_keyboard(routes, max_size):
+    result = []
+    for i in range(0, max_size):
+        item = []
+        for j in range(0, max_size):
+            try:
+                item.append(routes[i*max_size + j*1])
+            except BaseException:
+                break
+        result.append(item)
+    return result
 
 def gender(bot, update):
-    user = update.message.from_user
-    logger.info("Gender of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('I see! Please send me a photo of yourself, '
-                              'so I know what you look like, or send /skip if you don\'t want to.',
-                              reply_markup=ReplyKeyboardRemove())
+    routes = minsk_trans.get_routes_html(update.message.text)
+    # reply_keyboard = ReplyKeyboardMarkup(routes)
+    # i = 0
+    # for route in routes:
+    #     if
+    # reply_keyboard = [routes]
+    reply_keyboard = create_keyboard(routes=routes, max_size=get_dimension(routes.__len__()))
+    # reply_keyboard = [['1','2','3'],
+    #                   ['4','5','6'],
+    #                   ['7','8','9']]
 
-    return PHOTO
+    # for route in routes:
+    #     button = KeyboardButton(u'{}'.format(route))
+    #     reply_keyboard.add(button)
+
+    user = update.message.from_user
+    logger.info("Transport for %s: %s", user.first_name, update.message.text)
+    update.message.reply_text('I see! Choose route number',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
+    return ROUTE
 
 
 def photo(bot, update):
@@ -140,7 +179,7 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            GENDER: [RegexHandler('^(Boy|Girl|Other)$', gender)],
+            GENDER: [RegexHandler('^(autobus|trolleybus|tram)$', gender)],
 
             PHOTO: [MessageHandler(Filters.photo, photo),
                     CommandHandler('skip', skip_photo)],

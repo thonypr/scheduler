@@ -63,18 +63,22 @@ def start(bot, update):
 #
 #     return PHOTO
 
-def get_dimension(count):
-    side = math.sqrt(count)
-    whole = math.trunc(side)
-    return whole + 1
+def get_dimension(count, cols):
+    # side = math.sqrt(count)
+    # whole = math.trunc(side)
+    # return whole + 1
+    rows = int(math.trunc(count/cols))+1
+    return rows
 
-def create_keyboard(routes, max_size):
+def create_keyboard(routes, rows, cols):
     result = []
-    for i in range(0, max_size):
+    count = 0
+    for i in range(0, rows):
         item = []
-        for j in range(0, max_size):
+        for j in range(0, cols):
             try:
-                item.append(routes[i*max_size + j*1])
+                item.append(routes[count])
+                count = count + 1
             except BaseException:
                 break
         result.append(item)
@@ -87,7 +91,7 @@ def gender(bot, update):
     # for route in routes:
     #     if
     # reply_keyboard = [routes]
-    reply_keyboard = create_keyboard(routes=routes, max_size=get_dimension(routes.__len__()))
+    reply_keyboard = create_keyboard(routes=routes, rows=get_dimension(routes.__len__(), cols=5), cols=5)
     # reply_keyboard = [['1','2','3'],
     #                   ['4','5','6'],
     #                   ['7','8','9']]
@@ -99,7 +103,7 @@ def gender(bot, update):
     user = update.message.from_user
     logger.info("Transport for %s: %s", user.first_name, update.message.text)
     update.message.reply_text('I see! Choose route number',
-                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True))
 
     return ROUTE
 

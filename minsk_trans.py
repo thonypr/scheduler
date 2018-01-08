@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import requests
+import html5lib
 import bs4
+import urllib2
 
 bus_page_name = u"autobus"
 trolley_page_name = u"trolleybus"
@@ -100,15 +102,32 @@ def get_stops_list():
 
 def get_routes_html(transport):
     page = requests.get(u"https://kogda.by/routes/minsk/{}".format(transport)).content
+
+    # try:
+    #     from BeautifulSoup import BeautifulSoup
+    # except ImportError:
+    #     from bs4 import BeautifulSoup
+    #
+    # try:
+    #     from urllib2 import urlopen
+    # except ImportError:
+    #     from urllib.request import urlopen  # py3k
+    #
+    # url = "https://kogda.by/routes/minsk/autobus"
+    # soup = BeautifulSoup(urlopen(url), "html5lib")
+    # print(soup.prettify())
+
     try:
         from BeautifulSoup import BeautifulSoup
     except ImportError:
         from bs4 import BeautifulSoup
     html = page
-    parsed_html = BeautifulSoup(html)
+    parsed_html = BeautifulSoup(page, "html5lib")
     routes = []
+    final = []
     text = 0
     i = 0
+
     while text is not None:
         text = parsed_html.body.find('div', attrs={'id': 'routes-block-{}'.format(i)})
         if text is not None:
@@ -123,7 +142,13 @@ def get_routes_html(transport):
             i += 1
         else:
             print "All routes were found"
-    return routes
+    for item in routes:
+        if item == u'                                    ':
+            del item
+        else:
+            trim = item.split('                                            ')[1]
+            final.append(trim)
+    return final
 
 
 def get_stops_in_route(direction, text, route_name):
@@ -194,6 +219,7 @@ def get_around_times_at_stop(transport, route_number, route, stop):
     except BaseException:
         return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
 
+get_routes_html("autobus")
 # get_stops_by_transport_and_number(u'trolleybus', u'35')
 # get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')
 #

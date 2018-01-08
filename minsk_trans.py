@@ -165,6 +165,29 @@ def get_stops_in_route(direction, text, route_name):
         return u"Error in getting stops for route {}".format(route_name)
 
 
+def get_directions_in_route(transport, route_number):
+    page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
+    try:
+        from BeautifulSoup import BeautifulSoup
+    except ImportError:
+        from bs4 import BeautifulSoup
+    parsed_html = BeautifulSoup(page, "html5lib")
+    text = 0
+    i = 0
+    result = []
+
+    while text is not None:
+        text = parsed_html.body.find('div', attrs={'id': 'direction-{}-heading'.format(i)})
+        if text is not None:
+            raw_direction = text.text.split("\n                                ")[1].split("\n")[0]
+            result.append(raw_direction)
+            i += 1
+        else:
+            print "All directions were found"
+    return result
+
+
+
 def get_stops_by_transport_and_number(transport, route_number):
     page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
     try:
@@ -219,7 +242,8 @@ def get_around_times_at_stop(transport, route_number, route, stop):
     except BaseException:
         return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
 
-get_routes_html("autobus")
+get_directions_in_route("autobus", u"30-с")
+ix = 0
 # get_stops_by_transport_and_number(u'trolleybus', u'35')
 # get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')
 #
@@ -249,5 +273,6 @@ get_routes_html("autobus")
 # # trolley_routes = get_routes_html(trolley_page_name)
 # # tran_routes = get_routes_html(tram_page_name)
 # i = 9
+
 
 

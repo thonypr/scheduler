@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 GENDER, PHOTO, LOCATION, BIO = range(4)
 TRANSPORT, ROUTE, DIRECTION, STOP = range(4)
+answers = []
 
 
 # def start(bot, update):
@@ -47,6 +48,9 @@ TRANSPORT, ROUTE, DIRECTION, STOP = range(4)
 
 def start(bot, update):
     reply_keyboard = [['autobus', 'trolleybus', 'tram']]
+    answer = {}
+    answer["user_id"] = update.message.from_user.id
+    answers.append(answer)
 
     update.message.reply_text(
         'Выберите вид транспорта',
@@ -63,12 +67,14 @@ def start(bot, update):
 #
 #     return PHOTO
 
+
 def get_dimension(count, cols):
     # side = math.sqrt(count)
     # whole = math.trunc(side)
     # return whole + 1
     rows = int(math.trunc(count/cols))+1
     return rows
+
 
 def create_keyboard(routes, rows, cols):
     result = []
@@ -84,8 +90,22 @@ def create_keyboard(routes, rows, cols):
         result.append(item)
     return result
 
+
+def get_answer_from_history(answers, user):
+    for answer in answers:
+        if answer["user_id"] == user:
+            return answer
+    return None
+
+
 def gender(bot, update):
-    routes = minsk_trans.get_routes_html(update.message.text)
+    answer = get_answer_from_history(answers, update.message.from_user.id)
+    if answer is None:
+        answer = {}
+        answers.append(answer)
+        answer = answers.pop()
+    answer["transport"] = update.message.text
+    routes = minsk_trans.get_routes_html(answer["transport"])
     # reply_keyboard = ReplyKeyboardMarkup(routes)
     # i = 0
     # for route in routes:
@@ -101,20 +121,36 @@ def gender(bot, update):
     #     reply_keyboard.add(button)
 
     user = update.message.from_user
-    logger.info("Transport for %s: %s", user.first_name, update.message.text)
+    logger.info("Transport for %s: %s", user.first_name, answer["transport"])
     update.message.reply_text('I see! Choose route number',
                               reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True))
 
-    return ROUTE
+    return PHOTO
 
+
+# def photo(bot, update):
+#     user = update.message.from_user
+#     photo_file = bot.get_file(update.message.photo[-1].file_id)
+#     photo_file.download('user_photo.jpg')
+#     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
+#     update.message.reply_text('Gorgeous! Now, send me your location please, '
+#                               'or send /skip if you don\'t want to.')
+#
+#     return LOCATION
 
 def photo(bot, update):
+
     user = update.message.from_user
-    photo_file = bot.get_file(update.message.photo[-1].file_id)
-    photo_file.download('user_photo.jpg')
-    logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text('Gorgeous! Now, send me your location please, '
-                              'or send /skip if you don\'t want to.')
+    answer = get_answer_from_history(answers, user.id)
+    route_number = update.message.text
+    answer["route_number"] = route_number
+    directions = minsk_trans.get_directions_in_route(answer["transport"], answer["route_number"])
+    # photo_file = bot.get_file(update.message.photo[-1].file_id)
+    # photo_file.download('user_photo.jpg'
+    reply_keyboard = create_keyboard(routes=directions, rows=directions.__len__(), cols=1)
+    logger.info("Route number of %s: %s", user.first_name, answer["route_number"])
+    update.message.reply_text('Gorgeous! Now, send me route direction',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
     return LOCATION
 
@@ -130,9 +166,12 @@ def skip_photo(bot, update):
 
 def location(bot, update):
     user = update.message.from_user
-    user_location = update.message.location
-    logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
-                user_location.longitude)
+    answer = get_answer_from_history(answers, user.id)
+    answer["direction"] = update.message.text
+    stops = minsk_trans.get_stops_by_transport_and_number(answer["transport"], answer["route_number"])
+    reply_keyboard = create_keyboard(routes=stops, rows=stops.__len__(), cols=5)
+    # user_location = update.message.location
+    logger.info("Stop for of %s: %s", user.first_name, answer["direction"])
     update.message.reply_text('Maybe I can visit you sometime! '
                               'At last, tell me something about yourself.')
 
@@ -185,10 +224,10 @@ def main():
         states={
             GENDER: [RegexHandler('^(autobus|trolleybus|tram)$', gender)],
 
-            PHOTO: [MessageHandler(Filters.photo, photo),
+            PHOTO: [MessageHandler(Filters.text, photo),
                     CommandHandler('skip', skip_photo)],
 
-            LOCATION: [MessageHandler(Filters.location, location),
+            LOCATION: [MessageHandler(Filters.text, location),
                        CommandHandler('skip', skip_location)],
 
             BIO: [MessageHandler(Filters.text, bio)]

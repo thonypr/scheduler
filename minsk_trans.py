@@ -40,64 +40,64 @@ def get_routes_list():
     return routes_list
 
 
-def get_stops_list():
-
-    routes_list = []
-    csv_raw_routes = requests.get('http://www.minsktrans.by/city/minsk/routes.txt').content.decode("utf-8-sig").encode("utf-8").split("\r\n")
-    print csv_raw_routes[-1]
-    del csv_raw_routes[-1]
-    headlines = csv_raw_routes[0].split(';')
-    del csv_raw_routes[0]
-
-    for route in csv_raw_routes:
-        route_item = route.split(';')
-        route_dict = {}
-        route_dict['{}'.format(headlines[0])] = route_item[0]
-        route_dict['{}'.format(headlines[1])] = route_item[1]
-        route_dict['{}'.format(headlines[2])] = route_item[2]
-        route_dict['{}'.format(headlines[3])] = route_item[3]
-        route_dict['{}'.format(headlines[4])] = route_item[4]
-        route_dict['{}'.format(headlines[5])] = route_item[5]
-        route_dict['{}'.format(headlines[6])] = route_item[6]
-        route_dict['{}'.format(headlines[7])] = route_item[7]
-        route_dict['{}'.format(headlines[8])] = route_item[8]
-        route_dict['{}'.format(headlines[9])] = route_item[9]
-        route_dict['{}'.format(headlines[10])] = route_item[10]
-        route_dict['{}'.format(headlines[11])] = route_item[11]
-        route_dict['{}'.format(headlines[12])] = route_item[12]
-        route_dict['{}'.format(headlines[13])] = route_item[13]
-        route_dict['{}'.format(headlines[14])] = route_item[14]
-        route_dict['{}'.format(headlines[15])] = route_item[15]
-        route_dict['{}'.format(headlines[16])] = route_item[16]
-
-        routes_list.append(route_dict)
-
-    filtered_routes = []
-    print routes_list[0]['RouteNum']
-
-    i = 0
-    print routes_list.__len__()
-
-    while i < routes_list.__len__():
-        print "entered"
-        print u'i = {}'.format(i)
-        # если указан RouteNum ок, берём элемент
-        if routes_list[i]['RouteNum']:
-            # print "found init"
-            filtered_routes.append(routes_list[i])
-            i += 1
-            # проверить, есть ли реверс
-            if not routes_list[i]['RouteNum'] and routes_list[i]['RouteName'].split(" - ").sort() == routes_list[i-1]['RouteName'].split(" - ").sort():
-                # print "found reverse"
-                routes_list[i]['RouteNum'] = routes_list[i-1]['RouteNum']
-                filtered_routes.append(routes_list[i])
-                i += 1
-        else:
-            i += 1
-        # if i > routes_list.__len__():
-        #     break
-    print u'i = {}'.format(i)
-    return routes_list
+# def get_stops_list():
+#
+#     routes_list = []
+#     csv_raw_routes = requests.get('http://www.minsktrans.by/city/minsk/routes.txt').content.decode("utf-8-sig").encode("utf-8").split("\r\n")
+#     print csv_raw_routes[-1]
+#     del csv_raw_routes[-1]
+#     headlines = csv_raw_routes[0].split(';')
+#     del csv_raw_routes[0]
+#
+#     for route in csv_raw_routes:
+#         route_item = route.split(';')
+#         route_dict = {}
+#         route_dict['{}'.format(headlines[0])] = route_item[0]
+#         route_dict['{}'.format(headlines[1])] = route_item[1]
+#         route_dict['{}'.format(headlines[2])] = route_item[2]
+#         route_dict['{}'.format(headlines[3])] = route_item[3]
+#         route_dict['{}'.format(headlines[4])] = route_item[4]
+#         route_dict['{}'.format(headlines[5])] = route_item[5]
+#         route_dict['{}'.format(headlines[6])] = route_item[6]
+#         route_dict['{}'.format(headlines[7])] = route_item[7]
+#         route_dict['{}'.format(headlines[8])] = route_item[8]
+#         route_dict['{}'.format(headlines[9])] = route_item[9]
+#         route_dict['{}'.format(headlines[10])] = route_item[10]
+#         route_dict['{}'.format(headlines[11])] = route_item[11]
+#         route_dict['{}'.format(headlines[12])] = route_item[12]
+#         route_dict['{}'.format(headlines[13])] = route_item[13]
+#         route_dict['{}'.format(headlines[14])] = route_item[14]
+#         route_dict['{}'.format(headlines[15])] = route_item[15]
+#         route_dict['{}'.format(headlines[16])] = route_item[16]
+#
+#         routes_list.append(route_dict)
+#
+#     filtered_routes = []
+#     print routes_list[0]['RouteNum']
+#
+#     i = 0
+#     print routes_list.__len__()
+#
+#     while i < routes_list.__len__():
+#         print "entered"
+#         print u'i = {}'.format(i)
+#         # если указан RouteNum ок, берём элемент
+#         if routes_list[i]['RouteNum']:
+#             # print "found init"
+#             filtered_routes.append(routes_list[i])
+#             i += 1
+#             # проверить, есть ли реверс
+#             if not routes_list[i]['RouteNum'] and routes_list[i]['RouteName'].split(" - ").sort() == routes_list[i-1]['RouteName'].split(" - ").sort():
+#                 # print "found reverse"
+#                 routes_list[i]['RouteNum'] = routes_list[i-1]['RouteNum']
+#                 filtered_routes.append(routes_list[i])
+#                 i += 1
+#         else:
+#             i += 1
+#         # if i > routes_list.__len__():
+#         #     break
+#     print u'i = {}'.format(i)
+#     return routes_list
 
 
 def get_routes_html(transport):
@@ -151,7 +151,31 @@ def get_routes_html(transport):
     return final
 
 
-def get_stops_in_route(transport, route_number, direction_index):
+def get_direction_index_by_route(transport, route_number, direction):
+    page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
+    try:
+        from BeautifulSoup import BeautifulSoup
+    except ImportError:
+        from bs4 import BeautifulSoup
+    parsed_html = BeautifulSoup(page, "html5lib")
+    text = 0
+    i = 0
+
+    while text is not None:
+        text = parsed_html.body.find('div', attrs={'id': 'direction-{}-heading'.format(i)})
+        # x = u'{}'.format(text.text)
+        # a = x.__contains__(u"{}".format(direction))
+        if text is not None:
+            if direction in text.text:
+                return i
+            else:
+                i = i+1
+        else:
+            print "All directions were checked"
+    return 666
+
+
+def get_stops_in_route(transport, route_number, direction):
     page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
     try:
         from BeautifulSoup import BeautifulSoup
@@ -161,17 +185,16 @@ def get_stops_in_route(transport, route_number, direction_index):
     result = []
 
     try:
-        stops = parsed_html.body.find('div', attrs={'id': 'direction-0'}).text
-        # stops = parsed_html.body.find('div', attrs={'id': 'direction-{}'.format(direction_index[0])}).text
+        direction_index = get_direction_index_by_route(transport, route_number, direction)
+        stops = parsed_html.body.find('div', attrs={'id': 'direction-{}'.format(direction_index)}).text
         stops = stops.split("\n\n\n                                            ")[0].split('\n')
         for stop in stops:
-            # stop = stop.split('\n')[0]
             stop = stop.strip()
             if stop is not u'':
                 result.append(stop)
         del result[0]
         return result
-    except AssertionError:
+    except BaseException:
         return u"Error in getting stops for route {}".format(route_number)
 
 
@@ -194,24 +217,22 @@ def get_directions_in_route(transport, route_number):
             i += 1
         else:
             print "All directions were found"
-    i = i - 1
-    return result, range(0, 3)
+    return result
 
 
-
-def get_stops_by_transport_and_number(transport, route_number):
-    page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
-    try:
-        from BeautifulSoup import BeautifulSoup
-    except ImportError:
-        from bs4 import BeautifulSoup
-    html = page
-    parsed_html = BeautifulSoup(html)
-    original_name = parsed_html.body.find('div', attrs={'id': 'direction-0-heading'}).text.split("\n\n\n                                ")[1].split("\n")[0]
-    reversed_name = parsed_html.body.find('div', attrs={'id': 'direction-1-heading'}).text.split("\n\n\n                                ")[1].split("\n")[0]
-    original_stops = get_stops_in_route(0, parsed_html, original_name)
-    reversed_stops = get_stops_in_route(1, parsed_html, reversed_name)
-    routes = []
+# def get_stops_by_transport_and_number(transport, route_number):
+#     page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
+#     try:
+#         from BeautifulSoup import BeautifulSoup
+#     except ImportError:
+#         from bs4 import BeautifulSoup
+#     html = page
+#     parsed_html = BeautifulSoup(html)
+#     original_name = parsed_html.body.find('div', attrs={'id': 'direction-0-heading'}).text.split("\n\n\n                                ")[1].split("\n")[0]
+#     reversed_name = parsed_html.body.find('div', attrs={'id': 'direction-1-heading'}).text.split("\n\n\n                                ")[1].split("\n")[0]
+#     original_stops = get_stops_in_route(0, parsed_html, original_name)
+#     reversed_stops = get_stops_in_route(1, parsed_html, reversed_name)
+#     routes = []
     # text = 0
     # i = 0
     # while text is not None:
@@ -228,11 +249,11 @@ def get_stops_by_transport_and_number(transport, route_number):
     #         i += 1
     #     else:
     #         print "All routes were found"
-    if reversed_name is not u'':
-        #TODO: think about getting route without reverse
-        return original_name, original_stops, reversed_name, reversed_stops
-    else:
-        return original_name, original_stops
+    # if reversed_name is not u'':
+    #     TODO: think about getting route without reverse
+        # return original_name, original_stops, reversed_name, reversed_stops
+    # else:
+    #     return original_name, original_stops
 
 
 def get_around_times_at_stop(transport, route_number, route, stop):
@@ -253,8 +274,8 @@ def get_around_times_at_stop(transport, route_number, route, stop):
     except BaseException:
         return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
 
-dirs,x = get_directions_in_route("autobus", u"30-с")
-get_stops_in_route("autobus", u"30-с", x)
+dirs = get_directions_in_route("autobus", u"30-с")
+get_stops_in_route("autobus", u"30-с", dirs[0])
 ix = 0
 # get_stops_by_transport_and_number(u'trolleybus', u'35')
 # get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')

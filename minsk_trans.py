@@ -275,7 +275,8 @@ def get_around_times_at_stop(transport, route_number, route, stop):
         return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
 
 dirs = get_directions_in_route("autobus", u"30-с")
-get_stops_in_route("autobus", u"30-с", dirs[0])
+stops = get_stops_in_route("autobus", u"30-с", dirs[0])
+print get_around_times_at_stop("autobus", u"30-с", dirs[0], stops[0])
 ix = 0
 # get_stops_by_transport_and_number(u'trolleybus', u'35')
 # get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')

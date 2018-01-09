@@ -151,18 +151,28 @@ def get_routes_html(transport):
     return final
 
 
-def get_stops_in_route(direction, text, route_name):
-    result = []
+def get_stops_in_route(transport, route_number, direction_index):
+    page = requests.get(u"https://kogda.by/routes/minsk/{0}/{1}".format(transport, route_number)).content
     try:
-        stops = text.body.find('div', attrs={'id': 'direction-{}'.format(direction)}).text
-        stops = stops.split("\n\n\n                                            ")
+        from BeautifulSoup import BeautifulSoup
+    except ImportError:
+        from bs4 import BeautifulSoup
+    parsed_html = BeautifulSoup(page, "html5lib")
+    result = []
+
+    try:
+        stops = parsed_html.body.find('div', attrs={'id': 'direction-0'}).text
+        # stops = parsed_html.body.find('div', attrs={'id': 'direction-{}'.format(direction_index[0])}).text
+        stops = stops.split("\n\n\n                                            ")[0].split('\n')
         for stop in stops:
-            stop = stop.split('\n')[0]
-            result.append(stop)
+            # stop = stop.split('\n')[0]
+            stop = stop.strip()
+            if stop is not u'':
+                result.append(stop)
         del result[0]
         return result
-    except BaseException:
-        return u"Error in getting stops for route {}".format(route_name)
+    except AssertionError:
+        return u"Error in getting stops for route {}".format(route_number)
 
 
 def get_directions_in_route(transport, route_number):
@@ -184,7 +194,8 @@ def get_directions_in_route(transport, route_number):
             i += 1
         else:
             print "All directions were found"
-    return result
+    i = i - 1
+    return result, range(0, 3)
 
 
 
@@ -242,7 +253,8 @@ def get_around_times_at_stop(transport, route_number, route, stop):
     except BaseException:
         return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
 
-get_directions_in_route("autobus", u"30-с")
+dirs,x = get_directions_in_route("autobus", u"30-с")
+get_stops_in_route("autobus", u"30-с", x)
 ix = 0
 # get_stops_by_transport_and_number(u'trolleybus', u'35')
 # get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')

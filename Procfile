@@ -1,1 +1,1 @@
-bot: python origin.py
+bot: python bot.py

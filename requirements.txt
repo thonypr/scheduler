@@ -6,6 +6,7 @@ pyTelegramBotAPI
 bs4
 # telegram
 telebot
+enum
 # python-telegram-bot
 jsonpath-rw
 jsonpath

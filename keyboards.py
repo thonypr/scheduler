@@ -30,8 +30,8 @@ def create_keyboard(items, rows, cols):
 
 def get_reset_keyboard():
     markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
-    items = ["/reset"]
-    markup.add(*[types.KeyboardButton(name) for name in items])
+    reset = types.KeyboardButton('/reset')
+    markup.row(reset)
     return markup
 
 

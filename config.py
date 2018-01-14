@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-token = u"424882927:AAGKLtBw6ZmZyQQH9mfSKVpztQO6LxzyNX8"
+
 
 
 class States(Enum):

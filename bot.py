@@ -10,6 +10,7 @@ import minsk_trans
 import messages
 
 token = os.environ['TELEGRAM_TOKEN']
+# token = config.token
 
 bot = telebot.TeleBot(token)
 history_items = {}
@@ -101,14 +102,14 @@ def user_entered_stop(message):
     times = minsk_trans.get_around_times_at_stop(transport, route, direction, stop)
     print u"User {user} selected stop:{stop}".format(user=message.chat.id, stop=message.text)
     if times.__len__() < 3:
-        bot.send_message(message.chat.id, messages.message_not_available(),
+        bot.send_message(chat_id=message.chat.id, text=messages.message_not_available(),
                          reply_markup=keyboards.get_reset_keyboard())
     elif times[0] == u'E':
-        bot.send_message(message.chat.id, messages.message_not_working(),
+        bot.send_message(chat_id=message.chat.id, text=messages.message_not_working(),
                          reply_markup=keyboards.get_reset_keyboard())
     else:
-        bot.send_message(message.chat.id, messages.message_schedule_info(transport, route, stop, times),
-                         keyboards.get_reset_keyboard())
+        bot.send_message(chat_id=message.chat.id, text=messages.message_schedule_info(transport, route, stop, times),
+                         reply_markup=keyboards.get_reset_keyboard())
     # Добавить запись в файл с ситорией запросов по этому пользователю
     # Из словарика удалить
     print history_items.items()

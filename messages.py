@@ -74,4 +74,5 @@ def message_schedule_info(transport, route, stop, times):
         future=Emoji.FUTURE,
         future_t=times[2]
     )
+    return text
 

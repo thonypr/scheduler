@@ -2,10 +2,11 @@
 
 # If you need to specify a version
 requests
-# pyTelegramBotAPI
+pyTelegramBotAPI
 bs4
 # telegram
-python-telegram-bot
+telebot
+# python-telegram-bot
 jsonpath-rw
 jsonpath
 

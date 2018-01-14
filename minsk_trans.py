@@ -268,16 +268,19 @@ def get_around_times_at_stop(transport, route_number, route, stop):
     try:
         times = parsed_html.body.find('div', attrs={'class': 'timetable'}).text.split("\n\n                    ")
         for time in times:
-            result.append(time.split('\n')[0])
-        del result[0]
+            x = time.split('\n')
+            for v in x:
+                if v.strip() is not u'':
+                    result.append(v.strip())
+        # del result[0]
         return result
     except BaseException:
         return u'Error in getting times for {0} # {1} at {2}'.format(transport, route_number, stop)
 
-dirs = get_directions_in_route("autobus", u"30-с")
-stops = get_stops_in_route("autobus", u"30-с", dirs[0])
-print get_around_times_at_stop("autobus", u"30-с", dirs[0], stops[0])
-ix = 0
+# dirs = get_directions_in_route("autobus", u"30-с")
+# stops = get_stops_in_route("autobus", u"30-с", dirs[0])
+# print get_around_times_at_stop("autobus", u"30-с", dirs[0], stops[0])
+# ix = 0
 # get_stops_by_transport_and_number(u'trolleybus', u'35')
 # get_around_times_at_stop(u'autobus', u'30-с', u'Корженевского - Красный Бор', u'пл. Казинца')
 #

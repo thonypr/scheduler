@@ -49,9 +49,12 @@ def user_entered_transport(message):
         history_items[message.chat.id].state = config.States.S_ENTER_ROUTE
     # Полагаем, что пользователь вводит исходя из кнопок
     routes = minsk_trans.get_routes_html(history_items[message.chat.id].transport)
-    print u"User {user} selected transport:{transport}".format(
+    try:
+        print u"User {user} selected transport:{transport}".format(
         user=message.chat.id,
         transport=history_items[message.chat.id].transport)
+    except UnicodeEncodeError:
+        print u'User: {user}::Error in print'.format(user=message.chat.id)
     bot.send_message(message.chat.id, messages.message_ask_for_route(),
                      reply_markup=keyboards.get_routes_keyboard(routes))
 
@@ -66,7 +69,10 @@ def user_entered_route(message):
     transport = history_items[user].transport
     route = history_items[user].route
     directions = minsk_trans.get_directions_in_route(transport, route)
-    print u"User {user} selected route:{route}".format(user=message.chat.id, route=message.text)
+    try:
+        print u"User {user} selected route:{route}".format(user=message.chat.id, route=message.text)
+    except UnicodeEncodeError:
+        print u'User: {user}::Error in print'.format(user=message.chat.id)
     bot.send_message(message.chat.id, messages.message_ask_for_direction(),
                      reply_markup=keyboards.get_directions_keyboard(directions))
 
@@ -82,7 +88,10 @@ def user_entered_direction(message):
     route = history_items[user].route
     direction = history_items[user].direction
     stops = minsk_trans.get_stops_in_route(transport, route, direction)
-    print u"User {user} selected direction:{direction}".format(user=message.chat.id, direction=message.text)
+    try:
+        print u"User {user} selected direction:{direction}".format(user=message.chat.id, direction=message.text)
+    except UnicodeEncodeError:
+        print u'User: {user}::Error in print'.format(user=message.chat.id)
     bot.send_message(message.chat.id, messages.message_ask_for_stop(),
                      reply_markup=keyboards.get_stops_keyboard(stops))
 
@@ -100,7 +109,10 @@ def user_entered_stop(message):
     direction = history_items[user].direction
     stop = history_items[user].stop
     times = minsk_trans.get_around_times_at_stop(transport, route, direction, stop)
-    print u"User {user} selected stop:{stop}".format(user=message.chat.id, stop=message.text)
+    try:
+        print u"User {user} selected stop:{stop}".format(user=message.chat.id, stop=message.text)
+    except UnicodeEncodeError:
+        print u'User: {user}::Error in print'.format(user=message.chat.id)
     if times.__len__() < 3:
         bot.send_message(chat_id=message.chat.id, text=messages.message_not_available(),
                          reply_markup=keyboards.get_reset_keyboard())
@@ -112,7 +124,7 @@ def user_entered_stop(message):
                          reply_markup=keyboards.get_reset_keyboard())
     # Добавить запись в файл с ситорией запросов по этому пользователю
     # Из словарика удалить
-    print history_items.items()
+    # print history_items.items()
     del history_items[message.chat.id]
 
 bot.polling(none_stop=True, interval=0)

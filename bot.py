@@ -47,10 +47,10 @@ def user_entered_transport(message):
         history_items[message.chat.id].transport = messages.get_transport_by_alias(message.text)
         history_items[message.chat.id].state = config.States.S_ENTER_ROUTE
     # Полагаем, что пользователь вводит исходя из кнопок
-    routes = minsk_trans.get_routes_html(message.text)
+    routes = minsk_trans.get_routes_html(history_items[message.chat.id].transport)
     print u"User {user} selected transport:{transport}".format(
         user=message.chat.id,
-        transport=message.text)
+        transport=history_items[message.chat.id].transport)
     bot.send_message(message.chat.id, messages.message_ask_for_route(),
                      reply_markup=keyboards.get_routes_keyboard(routes))
 

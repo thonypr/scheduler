@@ -2,7 +2,9 @@
 import requests
 import html5lib
 import bs4
-import urllib2
+import urllib3
+
+urllib3.logging.captureWarnings(True)
 
 bus_page_name = u"autobus"
 trolley_page_name = u"trolleybus"

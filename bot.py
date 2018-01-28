@@ -8,6 +8,7 @@ import history
 import keyboards
 import minsk_trans
 import messages
+import spreadsheet
 
 token = os.environ['TELEGRAM_TOKEN']
 # token = config.token
@@ -19,6 +20,21 @@ history_items = {}
 # Начало диалога
 @bot.message_handler(commands=["start"])
 def cmd_start(message):
+    user = message.chat.id
+    sheet = spreadsheet.get_active_sheet(user, 100)
+    sheet.append_row(1,1)
+    # row = 0
+    # range_build = 'A{row}:A{col}'.format(row=row + 1, col=all_links.__len__() + row)
+    # cell_list = sheet.range(range_build)
+    #
+    # for i in range(0, all_links.__len__()):
+    #     res = jira.analyse_result(all_links[i])
+    #     x = 0
+    #     for j in range(0, res.__len__()):
+    #         y = 0
+    #         cell_list[i * 5 + j].value = res[j]
+    #
+    # sheet.update_cells(cell_list)
     history_item = history.History(user=message.chat.id, state=config.States.S_ENTER_TRANSPORT)
     if history_items.get(message.chat.id) is None:
         history_items[history_item.user_id] = history_item

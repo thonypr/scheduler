@@ -6,6 +6,8 @@ pyTelegramBotAPI
 bs4
 # telegram
 telebot
+gspread
+oauth2client
 enum
 html5lib
 # python-telegram-bot

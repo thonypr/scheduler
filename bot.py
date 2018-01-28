@@ -24,6 +24,7 @@ def cmd_start(message):
         history_items[history_item.user_id] = history_item
     else:
         del history_items[message.chat.id]
+        history_items[history_item.user_id] = history_item
 
     bot.send_message(message.chat.id, messages.message_ask_for_transport(),
                      reply_markup=keyboards.get_basic_keyboard())
@@ -37,6 +38,7 @@ def cmd_reset(message):
         history_items[history_item.user_id] = history_item
     else:
         del history_items[message.chat.id]
+        history_items[history_item.user_id] = history_item
 
     bot.send_message(message.chat.id, messages.message_ask_for_transport(),
                      reply_markup=keyboards.get_basic_keyboard())
